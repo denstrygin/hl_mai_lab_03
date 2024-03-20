@@ -11,37 +11,25 @@
 AddElementTag("microService", $shape=EightSidedShape(), $bgColor="CornflowerBlue", $fontColor="white", $legendText="microservice")
 AddElementTag("storage", $shape=RoundedBoxShape(), $bgColor="lightSkyBlue", $fontColor="white")
 
-Person(admin, "Администратор")
-Person(security, "Безопасник")
 Person(user, "Пользователь")
 
-System_Ext(temp,"Датчик температуры")
-System_Ext(door,"Датчик входа")
-
-System_Boundary(smart_house, "Умный дом") {
-   Container(app, "Клиентское веб-приложение", "html, JavaScript, Angular", "Портал умного дома")
-   Container(client_service, "Сервис авторизации", "C++", "Сервис управления пользователями", $tags = "microService")    
-   Container(door_service, "Сервис входов", "C++", "Сервис управления информацией о входе/выходе", $tags = "microService") 
-   Container(temp_service, "Сервис погоды", "C++", "Сервис управления информацией о погоде", $tags = "microService")       
-   ContainerDb(db, "Данные умного дома", "MySQL", "Хранение данных конференции", $tags = "storage")
-   
+System_Boundary(chat_app, "Чат-приложение") {
+   Container(app, "Клиентское веб-приложение", "HTML, JavaScript, React", "Портал чат-приложения")
+   Container(auth_service, "Сервис авторизации", "Python, FastAPI", "Сервис управления пользователями", $tags = "microService")
+   Container(chat_service, "Сервис чатов", "Python, FastAPI", "Сервис управления чатами и сообщениями", $tags = "microService")
+   Container(messaging_service, "Сервис обмена сообщениями", "Python, FastAPI", "Сервис доставки сообщений", $tags = "microService")
+   ContainerDb(db, "База данных", "MariaDB", "Хранение данных пользователей, чатов и сообщений", $tags = "storage")
 }
 
-Rel_D(admin, app, "Добавление/просмотр информации о пользователях")
-Rel_D(security, app,"Просмотр информации о прозодах")
-Rel_D(user, app,"Просмотр информации о температуре")
+Rel(user, app, "Взаимодействует с")
 
-Rel(app,client_service,"Создание пользователя","http://localhost/person ")
-Rel(client_service,db,,"INTSERT/SELECT/UPDATE","SQL")
+Rel(app, auth_service, "Авторизация, создание и поиск пользователей", "HTTP")
+Rel(app, chat_service, "Управление чатами и сообщениями", "HTTP")
+Rel(app, messaging_service, "Отправка и получение сообщений", "WebSocket")
 
-Rel(app,door_service,"Работа с проходами","http://localhost/door ")
-Rel_L(door_service,door,"Запрос информации о проходах")
-Rel(door_service,db,,"INTSERT/SELECT/UPDATE","SQL")
-
-Rel(app,temp_service,"Работа с температурой","http://localhost/еуьз ")
-Rel_R(temp_service,temp,"Запрос текущей температуры")
-Rel(temp_service,db,"INTSERT/SELECT/UPDATE","SQL")
-
+Rel(auth_service, db, "Запросы к БД", "SQL")
+Rel(chat_service, db, "Запросы к БД", "SQL")
+Rel(messaging_service, db, "Запросы к БД", "SQL")
 
 @enduml
 ```
@@ -51,30 +39,36 @@ Rel(temp_service,db,"INTSERT/SELECT/UPDATE","SQL")
 
 **API**:
 -	Создание нового пользователя
-      - входыне параметры: login, Имя, Фамилия, email, обращение (гн/гжа)
+      - входыне параметры: login, password, first_name, last_name, email
       - выходные параметры, отсутствуют
 -	Поиск пользователя по логину
      - входные параметры:  login
-     - выходные параметры: Имя, Фамилия, email, обращение (гн/гжа)
+     - выходные параметры: user_id, first_name, last_name, email
 -	Поиск пользователя по маске имя и фамилии
-     - входные параметры: маска фамилии, маска имени
-     - выходные параметры: login, Имя, Фамилия, email, обращение (гн/гжа)
+     - входные параметры: first_name_mask, last_name_mask
+     - выходные параметры: user_id, login, first_name, last_name, email
 
-### Сервис входов
+### Сервис чатов
 **API**:
-- Сохранение информации о проходе
-  - Входные параметры: Дата прохода, Направление прохода (вход/выход)
+- Создание группового чата
+  - Входные параметры: chat_name, creator_user_id,  [member_user_ids]
   - Выходыне параметры: отсутствуют
-- Получение информации о совершенных проходах
-  - Входные параметры: диапазон дат
-  - Выходные параметры: массив пар время - направление прохода
-
-
-### Сервис температуры
-**API**:
-- Сохранение информации о измерениях температуре
-  - Входные параметры:  время замера, температура в цельсиях
+- Добавление пользователя в чат
+  - Входные параметры: chat_id, user_id
   - Выходные параметры: отсутствуют
-- Получение информации о измерениях температуры
-  - Входные параметры: диапазон дат
-  - Выходные параметры: массив пар время - температура
+- Добавление сообщения в групповой чат
+  - Входные параметры: chat_id, sender_user_id, message_content
+  - Выходные параметры: отсутствуют
+- Загрузка сообщений группового чата
+  - Входные параметры: chat_id
+  - Выходные параметры: message_id, sender_user_id, message_content, timestamp
+
+
+### Сервис обмена сообщениями
+**API**:
+- Отправка PtP сообщения пользователю
+  - Входные параметры:  sender_user_id, recipient_user_id, message_content
+  - Выходные параметры: отсутствуют
+- Получение PtP списка сообщений для пользователя
+  - Входные параметры: user_id, [optional_filters]
+  - Выходные параметры: message_id, sender_user_id, recipient_user_id, message_content, timestamp
