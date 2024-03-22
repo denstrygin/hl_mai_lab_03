@@ -1,0 +1,152 @@
+openapi: 3.0.0
+info:
+  title: Messenger API
+  description: API for authentication, group chat, and peer-to-peer messaging.
+  version: 1.0.0
+servers:
+  - url: http://localhost:8000
+    description: Authentication Service
+  - url: http://localhost:8001
+    description: Group Chat Service
+  - url: http://localhost:8002
+    description: Peer-to-Peer Messaging Service
+paths:
+  /create_user/:
+    post:
+      summary: Create a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCreate'
+      responses:
+        '200':
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '400':
+          description: Invalid input
+  /create_group_chat/:
+    post:
+      summary: Create a new group chat
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GroupChatCreate'
+      responses:
+        '200':
+          description: Group chat created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroupChatResponse'
+        '400':
+          description: Invalid input
+  /send_ptp_message/:
+    post:
+      summary: Send a peer-to-peer message
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PtpMessageCreate'
+      responses:
+        '200':
+          description: Message sent successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PtpMessageResponse'
+        '400':
+          description: Invalid input
+components:
+  schemas:
+    UserCreate:
+      type: object
+      required:
+        - login
+        - password
+        - first_name
+        - last_name
+        - email
+      properties:
+        login:
+          type: string
+        password:
+          type: string
+        first_name:
+          type: string
+        last_name:
+          type: string
+        email:
+          type: string
+    UserResponse:
+      type: object
+      properties:
+        user_id:
+          type: integer
+        login:
+          type: string
+        first_name:
+          type: string
+        last_name:
+          type: string
+        email:
+          type: string
+    GroupChatCreate:
+      type: object
+      required:
+        - chat_name
+        - creator_user_id
+        - member_user_ids
+      properties:
+        chat_name:
+          type: string
+        creator_user_id:
+          type: integer
+        member_user_ids:
+          type: array
+          items:
+            type: integer
+    GroupChatResponse:
+      type: object
+      properties:
+        chat_id:
+          type: integer
+        chat_name:
+          type: string
+        creator_user_id:
+          type: integer
+    PtpMessageCreate:
+      type: object
+      required:
+        - sender_user_id
+        - recipient_user_id
+        - message_content
+      properties:
+        sender_user_id:
+          type: integer
+        recipient_user_id:
+          type: integer
+        message_content:
+          type: string
+    PtpMessageResponse:
+      type: object
+      properties:
+        message_id:
+          type: integer
+        sender_user_id:
+          type: integer
+        recipient_user_id:
+          type: integer
+        message_content:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
