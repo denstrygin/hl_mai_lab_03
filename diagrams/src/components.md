@@ -34,9 +34,8 @@ Rel(messaging_service, db, "Запросы к БД", "SQL")
 @enduml
 ```
 ## Список компонентов
+
 ### Сервис авторизации
-
-
 **API**:
 -	Создание нового пользователя
       - входыне параметры: login, password, first_name, last_name, email
@@ -47,12 +46,11 @@ Rel(messaging_service, db, "Запросы к БД", "SQL")
 -	Поиск пользователя по маске имя и фамилии
      - входные параметры: first_name_mask, last_name_mask
      - выходные параметры: user_id, login, first_name, last_name, email
-
 ### Сервис чатов
 **API**:
 - Создание группового чата
   - Входные параметры: chat_name, creator_user_id,  [member_user_ids]
-  - Выходыне параметры: отсутствуют
+  - Выходыне параметры: chat_id
 - Добавление пользователя в чат
   - Входные параметры: chat_id, user_id
   - Выходные параметры: отсутствуют
