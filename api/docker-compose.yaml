@@ -45,6 +45,7 @@ services:
       - "8000:8000"
     depends_on:
       - proxysql
+      - redis
     environment:
       - SQLALCHEMY_DATABASE_URL=mariadb+mariadbconnector://denstrygin:4054@proxysql:6033/messenger
 
@@ -56,6 +57,7 @@ services:
       - "8001:8001"
     depends_on:
       - proxysql
+      - redis
     environment:
       - SQLALCHEMY_DATABASE_URL=mariadb+mariadbconnector://denstrygin:4054@proxysql:6033/messenger
 
@@ -67,8 +69,15 @@ services:
       - "8002:8002"
     depends_on:
       - proxysql
+      - redis
     environment:
       - SQLALCHEMY_DATABASE_URL=mariadb+mariadbconnector://denstrygin:4054@proxysql:6033/messenger
+
+  redis:
+    image: redis
+    restart: always
+    ports:
+      - "6379:6379"
 
 volumes:
   mariadb_data1:

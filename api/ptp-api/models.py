@@ -28,5 +28,14 @@ class PtpMessage(Base):
     recipient_user_id = Column(Integer, ForeignKey('users.user_id'))
     message_content = Column(Text, nullable=False)
     timestamp = Column(DateTime, default=datetime.utcnow)
+    
+    def as_dict(self):
+        return {
+            "message_id": self.message_id,
+            "sender_user_id": self.sender_user_id,
+            "recipient_user_id": self.recipient_user_id,
+            "message_content": self.message_content,
+            "timestamp": self.timestamp if isinstance(self.timestamp, str) else self.timestamp.isoformat()
+        }
 
 Base.metadata.create_all(bind=engine)

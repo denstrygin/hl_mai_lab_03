@@ -27,5 +27,11 @@ def get_user_by_login(login: str, db: Session = Depends(get_db)):
 
 @app.get("/search_users/", response_model=list[schemas.UserResponse])
 def search_users(first_name_mask: str = None, last_name_mask: str = None, db: Session = Depends(get_db)):
+    cached_user_ids = crud.get_cached_search_results(first_name_mask, last_name_mask)
+    if cached_user_ids:
+        cached_users = [crud.get_user_by_id(db, user_id) for user_id in cached_user_ids]
+        return cached_users
+
     users = crud.search_users(db, first_name_mask, last_name_mask)
+    crud.cache_search_results(first_name_mask, last_name_mask, users)
     return users
