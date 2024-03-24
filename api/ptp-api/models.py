@@ -5,7 +5,7 @@ from datetime import datetime
 
 Base = declarative_base()
 
-SQLALCHEMY_DATABASE_URL = "mariadb+mariadbconnector://denstrygin:4054@mariadb:3306/messenger"
+SQLALCHEMY_DATABASE_URL = "mariadb+mariadbconnector://denstrygin:4054@proxysql:6033/messenger"
 
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

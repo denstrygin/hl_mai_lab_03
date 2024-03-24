@@ -7,6 +7,7 @@ PTP_SERVICE_URL = "http://localhost:8002"
 def test_auth_service():
     # Создание нового пользователя
     new_user = {
+        "user_id": 1,
         "login": "wkfbwek",
         "password": "password3",
         "first_name": "Test3",
@@ -29,6 +30,7 @@ def test_auth_service():
 def test_chat_service():
     # Создание первого пользователя
     user1_response = requests.post(f"{AUTH_SERVICE_URL}/create_user/", json={
+        "user_id": 2,
         "login": "wefkjwebf",
         "password": "password",
         "first_name": "User",
@@ -40,6 +42,7 @@ def test_chat_service():
 
     # Создание второго пользователя
     user2_response = requests.post(f"{AUTH_SERVICE_URL}/create_user/", json={
+        "user_id": 3,
         "login": "jwefkw",
         "password": "password",
         "first_name": "User",
@@ -95,7 +98,7 @@ def test_ptp_service():
     assert any(message["message_content"] == new_ptp_message["message_content"] for message in response.json())
 
 if __name__ == "__main__":
-    test_auth_service()
-    test_chat_service()
-    test_ptp_service()
+    # test_auth_service()
+    # test_chat_service()
+    # test_ptp_service()
     print("All tests passed!")

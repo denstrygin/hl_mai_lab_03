@@ -1,7 +1,7 @@
 version: '3'
 
 services:
-  mariadb:
+  mariadb1:
     image: mariadb
     restart: always
     env_file:
@@ -9,9 +9,33 @@ services:
     ports:
       - "3306:3306"
     volumes:
-      - mariadb_data:/var/lib/mysql
+      - mariadb_data1:/var/lib/mysql
       - ./mariadb/init.sql:/docker-entrypoint-initdb.d/1_init.sql
-      - ./mariadb/insert.sql:/docker-entrypoint-initdb.d/2_insert.sql
+      # - ./mariadb/insert.sql:/docker-entrypoint-initdb.d/2_insert.sql
+
+  mariadb2:
+    image: mariadb
+    restart: always
+    env_file:
+      - mariadb/mariadb.conf
+    ports:
+      - "3307:3306"
+    volumes:
+      - mariadb_data2:/var/lib/mysql
+      - ./mariadb/init.sql:/docker-entrypoint-initdb.d/1_init.sql
+      # - ./mariadb/insert.sql:/docker-entrypoint-initdb.d/2_insert.sql
+
+  proxysql:
+    image: severalnines/proxysql
+    restart: always
+    ports:
+      - "6032:6032" # Admin
+      - "6033:6033" # ProxySQL service
+    volumes:
+      - ./proxysql/proxysql.cnf:/etc/proxysql.cnf
+    depends_on:
+      - mariadb1
+      - mariadb2
 
   auth:
     image: auth-api:latest
@@ -20,9 +44,9 @@ services:
     ports:
       - "8000:8000"
     depends_on:
-      - mariadb
+      - proxysql
     environment:
-      - SQLALCHEMY_DATABASE_URL=mariadb+mariadbconnector://denstrygin:4054@mariadb:3306/messenger
+      - SQLALCHEMY_DATABASE_URL=mariadb+mariadbconnector://denstrygin:4054@proxysql:6033/messenger
 
   groupchat:
     image: groupchat-api:latest
@@ -31,9 +55,9 @@ services:
     ports:
       - "8001:8001"
     depends_on:
-      - mariadb
+      - proxysql
     environment:
-      - SQLALCHEMY_DATABASE_URL=mariadb+mariadbconnector://denstrygin:4054@mariadb:3306/messenger
+      - SQLALCHEMY_DATABASE_URL=mariadb+mariadbconnector://denstrygin:4054@proxysql:6033/messenger
 
   ptp:
     image: ptp-api:latest
@@ -42,10 +66,12 @@ services:
     ports:
       - "8002:8002"
     depends_on:
-      - mariadb
+      - proxysql
     environment:
-      - SQLALCHEMY_DATABASE_URL=mariadb+mariadbconnector://denstrygin:4054@mariadb:3306/messenger
+      - SQLALCHEMY_DATABASE_URL=mariadb+mariadbconnector://denstrygin:4054@proxysql:6033/messenger
 
 volumes:
-  mariadb_data:
+  mariadb_data1:
+    driver: local
+  mariadb_data2:
     driver: local
